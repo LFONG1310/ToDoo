@@ -225,11 +225,6 @@
   background: #1d4ed8;
 }
 
-.notifications-total {
-  color: #536581;
-  font-size: 13px;
-}
-
 .notifications-inbox .notification-list {
   max-height: none;
 }
@@ -243,6 +238,11 @@
   margin-top: 16px;
   color: #536581;
   font-size: 14px;
+}
+
+.notifications-page button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* Accesibilidad: foco del teclado */
