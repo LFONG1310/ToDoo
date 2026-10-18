@@ -14,7 +14,7 @@ import './comentarios.css'
 // Cada cuanto se buscan comentarios nuevos mientras la pestana esta visible.
 const INTERVALO_MS = 15000
 
-export default function ComentariosTablero({ tableroId, usuarioId, esPropietario }) {
+export default function ComentariosTablero({ proyectoId, usuarioId, esAdministrador }) {
   const { sesionExpirada } = useSesion()
   const [comentarios, setComentarios] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -41,7 +41,7 @@ export default function ComentariosTablero({ tableroId, usuarioId, esPropietario
       controller = actual
       const version = versionRef.current
       try {
-        const datos = await listarComentarios(tableroId, actual.signal)
+        const datos = await listarComentarios(proyectoId, actual.signal)
         if (activo && version === versionRef.current) {
           setComentarios(datos)
           setErrorCarga(null)
@@ -68,7 +68,7 @@ export default function ComentariosTablero({ tableroId, usuarioId, esPropietario
       clearInterval(intervalo)
       document.removeEventListener('visibilitychange', siEstaVisible)
     }
-  }, [tableroId, sesionExpirada])
+  }, [proyectoId, sesionExpirada])
 
   // Mantiene la vista en el ultimo mensaje, salvo que la persona haya subido a leer los anteriores.
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function ComentariosTablero({ tableroId, usuarioId, esPropietario
     setAviso('')
     versionRef.current += 1
     try {
-      const nuevo = await publicarComentario(tableroId, limpio)
+      const nuevo = await publicarComentario(proyectoId, limpio)
       pegadoAbajoRef.current = true
       setComentarios((actuales) => [...actuales.filter((c) => c.id !== nuevo.id), nuevo])
       setTexto('')
@@ -119,7 +119,7 @@ export default function ComentariosTablero({ tableroId, usuarioId, esPropietario
     setAviso('')
     versionRef.current += 1
     try {
-      const actualizado = await editarComentario(tableroId, comentarioId, nuevoTexto)
+      const actualizado = await editarComentario(proyectoId, comentarioId, nuevoTexto)
       setComentarios((actuales) => actuales.map((c) => (c.id === comentarioId ? actualizado : c)))
       setAviso('Comentario actualizado.')
       return true
@@ -135,7 +135,7 @@ export default function ComentariosTablero({ tableroId, usuarioId, esPropietario
     setAviso('')
     versionRef.current += 1
     try {
-      await eliminarComentario(tableroId, comentarioId)
+      await eliminarComentario(proyectoId, comentarioId)
       setComentarios((actuales) => actuales.filter((c) => c.id !== comentarioId))
       setAviso('Comentario eliminado.')
       return true
@@ -156,8 +156,8 @@ export default function ComentariosTablero({ tableroId, usuarioId, esPropietario
   return (
     <section className="conversacion" aria-labelledby={tituloId}>
       <header className="conversacion-encabezado">
-        <h2 id={tituloId}>Conversación del tablero</h2>
-        <p>Solo los responsables de este tablero pueden ver estos mensajes.</p>
+        <h2 id={tituloId}>Conversación del equipo</h2>
+        <p>Solo los miembros de este proyecto pueden ver estos mensajes.</p>
       </header>
 
       {cargando ? (
@@ -175,8 +175,8 @@ export default function ComentariosTablero({ tableroId, usuarioId, esPropietario
             <ComentarioItem
               key={comentario.id}
               comentario={comentario}
-              esPropio={comentario.usuario_id === usuarioId}
-              puedeEliminar={comentario.usuario_id === usuarioId || esPropietario}
+              esPropio={comentario.autor_id === usuarioId}
+              puedeEliminar={comentario.autor_id === usuarioId || esAdministrador}
               onGuardar={guardarEdicion}
               onEliminar={eliminar}
             />

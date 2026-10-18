@@ -24,9 +24,9 @@ function servidor(responder) {
 }
 
 test('lee la conversacion del tablero con la sesion y sin cache', async () => {
-  const llamadas = servidor(() => Response.json([{ id: 1, texto: 'Hola' }]))
-  assert.deepEqual(await listarComentarios(7), [{ id: 1, texto: 'Hola' }])
-  assert.equal(llamadas[0].url, '/api/tableros/7/comentarios')
+  const llamadas = servidor(() => Response.json([{ id: 1, contenido: 'Hola' }]))
+  assert.deepEqual(await listarComentarios(7), [{ id: 1, contenido: 'Hola' }])
+  assert.equal(llamadas[0].url, '/api/proyectos/7/comentarios')
   assert.equal(llamadas[0].options.credentials, 'same-origin')
   assert.equal(llamadas[0].options.cache, 'no-store')
 })
@@ -35,11 +35,11 @@ test('publica con el token CSRF y solo envia el texto', async () => {
   const llamadas = servidor((url, options) => {
     assert.equal(options.headers['X-CSRF-TOKEN'], 'tok-1')
     assert.equal(options.headers['Content-Type'], 'application/json')
-    assert.deepEqual(JSON.parse(options.body), { texto: 'Listo' })
-    return Response.json({ id: 9, texto: 'Listo' }, { status: 201 })
+    assert.deepEqual(JSON.parse(options.body), { contenido: 'Listo' })
+    return Response.json({ id: 9, contenido: 'Listo' }, { status: 201 })
   })
   assert.equal((await publicarComentario(7, 'Listo')).id, 9)
-  assert.deepEqual(llamadas.map((l) => `${l.method} ${l.url}`), ['GET /api/csrf', 'POST /api/tableros/7/comentarios'])
+  assert.deepEqual(llamadas.map((l) => `${l.method} ${l.url}`), ['GET /api/csrf', 'POST /api/proyectos/7/comentarios'])
 })
 
 test('reutiliza el token CSRF entre peticiones', async () => {
@@ -48,7 +48,7 @@ test('reutiliza el token CSRF entre peticiones', async () => {
   await editarComentario(1, 1, 'b')
   assert.equal(llamadas.filter((l) => l.url === '/api/csrf').length, 1)
   assert.equal(llamadas[2].method, 'PATCH')
-  assert.equal(llamadas[2].url, '/api/tableros/1/comentarios/1')
+  assert.equal(llamadas[2].url, '/api/proyectos/1/comentarios/1')
 })
 
 test('pide un token nuevo y reintenta una vez si el servidor responde 403', async () => {
@@ -69,7 +69,7 @@ test('explica por que no se puede editar un comentario ajeno', async () => {
 
 test('distingue un tablero sin acceso de una sesion vencida', async () => {
   servidor(() => new Response(null, { status: 404 }))
-  await assert.rejects(listarComentarios(1), { status: 404, message: 'Este tablero no existe o ya no formas parte de él.' })
+  await assert.rejects(listarComentarios(1), { status: 404, message: 'Este proyecto no existe o ya no formas parte de él.' })
   servidor(() => new Response(null, { status: 401 }))
   await assert.rejects(listarComentarios(1), { status: 401, message: 'Tu sesión terminó. Inicia sesión de nuevo.' })
 })

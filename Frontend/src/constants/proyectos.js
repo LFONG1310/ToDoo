@@ -1,6 +1,9 @@
 // El frontend actual dispone de un único tablero compartido.
 export const PROYECTO_PRINCIPAL = {
   id: 'principal',
+  // TEMPORAL: id del proyecto en MySQL (tabla proyectos) para la conversacion del tablero.
+  // Las tareas siguen en localStorage; cuando el tablero use la API, usar solo el id numerico.
+  apiId: 1,
   name: 'Mi tablero de tareas',
   description: 'Organiza tus tareas y sigue su avance desde Por hacer hasta Hecho.',
   boardUrl: '/kanban',

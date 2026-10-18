@@ -3,6 +3,8 @@ import { useState } from 'react'
 import TareaCard from '../../components/Tareas/TareaCard'
 import TareaForm from '../../components/Tareas/TareaForm'
 import FiltrosTablero from '../../components/Tareas/FiltrosTablero'
+import PanelConversacion from '../../components/comentarios/PanelConversacion.jsx'
+import { PROYECTO_PRINCIPAL } from '../../constants/proyectos'
 import { MIEMBROS_EQUIPO, USUARIO_ACTUAL_ID } from '../../constants/tareas'
 import { cargarTablero, guardarTareas } from '../../services/tareasStorage'
 import { moverTarea } from '../../utils/moverTarea'
@@ -179,6 +181,9 @@ export default function KanbanPage() {
             </section>
             )
           })}
+        </div>
+        <div className="mt-8">
+          <PanelConversacion proyectoId={PROYECTO_PRINCIPAL.apiId} volverA="/kanban" />
         </div>
       </main>
     </div>

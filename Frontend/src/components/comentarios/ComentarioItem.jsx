@@ -22,7 +22,7 @@ export default function ComentarioItem({ comentario, esPropio, puedeEliminar, on
   const borradorValido = caracteres > 0 && caracteres <= MAX_COMENTARIO
 
   function empezarEdicion() {
-    setBorrador(comentario.texto)
+    setBorrador(comentario.contenido)
     setConfirmando(false)
     setEditando(true)
   }
@@ -95,7 +95,7 @@ export default function ComentarioItem({ comentario, esPropio, puedeEliminar, on
             </div>
           </form>
         ) : (
-          <p className="comentario-texto">{comentario.texto}</p>
+          <p className="comentario-texto">{comentario.contenido}</p>
         )}
 
         {!editando && (esPropio || puedeEliminar) && (

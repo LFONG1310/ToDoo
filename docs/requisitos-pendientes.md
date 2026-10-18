@@ -52,3 +52,11 @@ Para conectar el tablero cuando existan la base, el login y la API para crear y 
 2. Cargar las tareas con `getTareas(proyectoId, filtros)` de `services/tareasApi.js` en lugar de `cargarTablero`. La búsqueda de texto sigue aplicándose en el navegador con `filtrarTareas`.
 3. `adaptarTarea` convierte la respuesta al formato del tablero. Las tarjetas pueden mostrar `responsableNombre` en lugar de buscar el nombre en `MIEMBROS_EQUIPO`.
 4. El frontend usa `PROYECTO_PRINCIPAL.id = 'principal'`; la API espera un id numérico de `proyectos`.
+
+## Inicio de sesión y comentarios (rama `Comentarios`)
+
+- **Login real:** `POST /api/auth/login` valida `usuarios.password_hash` (PBKDF2), renueva la sesión y guarda `usuarioId`. `GET /api/auth/sesion` y `POST /api/auth/logout` completan el flujo. El registro (`/register`) sigue siendo solo la pantalla.
+- **Sesión y CSRF compartidos:** `com.todoo.seguridad.SesionUsuario` (antes `SesionNotificaciones`) protege todo `/api/**` salvo el login, y exige `X-CSRF-TOKEN` en POST/PATCH/DELETE (`GET /api/csrf`). Por eso se retiró `TareaWebConfig`.
+- **Conversación del tablero:** tabla `comentarios` con `tarea_id` NULL. Solo los miembros activos leen y escriben; el autor edita; el autor o un `administrador` eliminan. Se muestra debajo del tablero en `/kanban` y se actualiza cada 15 s.
+- **Puente temporal:** el tablero aún guarda las tareas en `localStorage`, así que la conversación usa `PROYECTO_PRINCIPAL.apiId = 1` (`constants/proyectos.js`). Al conectar el tablero a la API, usar el id real del proyecto.
+- **Pendiente:** comentarios por tarea (`tarea_id` con valor) cuando exista la API para crear y editar tareas, y notificar a los miembros cuando alguien comenta.

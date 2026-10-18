@@ -1,7 +1,23 @@
-import { Link, NavLink } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import todooLogo from '../../assets/todoo-logo.png'
+import { useSesion } from '../../sesion/sesionContext.js'
 
 export default function NavBar({ children }) {
+  const { usuario, cerrarSesion } = useSesion()
+  const navigate = useNavigate()
+  const [saliendo, setSaliendo] = useState(false)
+
+  async function salir() {
+    setSaliendo(true)
+    try {
+      await cerrarSesion()
+    } finally {
+      setSaliendo(false)
+      navigate('/login')
+    }
+  }
+
   return (
     <nav aria-label="Navegación principal" className="w-full text-black flex min-h-16 items-center gap-3 bg-white shadow-md p-4 flex-wrap">
       <Link to="/" aria-label="ToDoo: inicio">
@@ -24,7 +40,16 @@ export default function NavBar({ children }) {
         </ul>
         <div className="flex items-center gap-4">
           {children}
-          <button className="whitespace-nowrap">Cerrar sesión</button>
+          {usuario ? (
+            <>
+              <span className="text-sm text-gray-600">{usuario.nombre}</span>
+              <button type="button" onClick={salir} disabled={saliendo} className="whitespace-nowrap hover:text-blue-700 disabled:opacity-60">
+                {saliendo ? 'Saliendo…' : 'Cerrar sesión'}
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="whitespace-nowrap font-semibold text-blue-700 hover:underline">Iniciar sesión</Link>
+          )}
         </div>
       </div>
     </nav>
