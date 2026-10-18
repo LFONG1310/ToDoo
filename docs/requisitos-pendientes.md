@@ -34,3 +34,21 @@ El segundo comando requiere un servidor y un esquema configurados. No se ejecuta
 La propuesta requiere responsable y fecha límite por tarea, y usa IDs enteros compatibles con la tabla de notificaciones integrada. Los usuarios se desactivan y los proyectos/tareas se archivan para conservar las referencias y discusiones. La pertenencia se conserva mediante `activo` en los miembros; el servicio futuro deberá comprobar ese estado.
 
 No se agregan triggers de notificación: duplicarían los avisos si el servicio de tareas llama también a `notificarAsignacion`. La creación automática debe tener un único responsable, en este diseño el servicio transaccional del backend. El esquema prepara el almacenamiento, pero por sí solo no implementa el flujo de asignación ni la autenticación.
+
+## Filtros del tablero (rama `Filtros`)
+
+El tablero filtra por prioridad, responsable y "solo mis tareas" sobre las tareas de `localStorage`. El backend ya expone la consulta equivalente, pero el frontend todavía no la usa.
+
+- `GET /api/proyectos/{id}/tareas` acepta `prioridad` (`alta`, `media`, `baja`), `responsableId` y `soloMias=true`. Devuelve las tareas no archivadas del proyecto ordenadas por estado, posición e id, con el responsable como `{ id, nombre }`.
+- `GET /api/proyectos/{id}/responsables` lista los miembros activos del proyecto para el selector.
+- Ambas rutas exigen el atributo de sesión `usuarioId` (401 sin sesión) y que el usuario sea miembro activo del proyecto (404 en caso contrario, para no revelar proyectos ajenos). Un filtro inválido devuelve 400.
+- `soloMias` usa siempre el usuario de la sesión. Si además se envía otro `responsableId`, la respuesta es una lista vacía.
+
+Todo el SQL está en `com.todoo.tareas.TareaRepository` y sigue `database/propuesta_mysql.sql` (`tareas`, `miembros_proyecto`, `usuarios`). Si el esquema definitivo cambia nombres de tablas o columnas, solo ese archivo y `src/test/resources/tareas_schema.sql` deben ajustarse. Las pruebas usan H2; la consulta no se ha ejecutado contra un MySQL real.
+
+Para conectar el tablero cuando existan la base, el login y la API para crear y editar tareas:
+
+1. Reemplazar `MIEMBROS_EQUIPO` por `getResponsables(proyectoId)` y `USUARIO_ACTUAL_ID` por el usuario de la sesión (`constants/tareas.js`).
+2. Cargar las tareas con `getTareas(proyectoId, filtros)` de `services/tareasApi.js` en lugar de `cargarTablero`. La búsqueda de texto sigue aplicándose en el navegador con `filtrarTareas`.
+3. `adaptarTarea` convierte la respuesta al formato del tablero. Las tarjetas pueden mostrar `responsableNombre` en lugar de buscar el nombre en `MIEMBROS_EQUIPO`.
+4. El frontend usa `PROYECTO_PRINCIPAL.id = 'principal'`; la API espera un id numérico de `proyectos`.

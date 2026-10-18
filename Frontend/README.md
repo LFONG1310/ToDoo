@@ -22,16 +22,17 @@ pnpm preview  # Vista local de la compilación
 
 ## Funcionalidad
 
-- Crear tareas con título obligatorio de hasta 100 caracteres y descripción opcional de hasta 500.
+- Crear tareas con título obligatorio de hasta 100 caracteres, descripción opcional de hasta 500, prioridad (alta, media o baja; media por defecto) y responsable opcional.
 - Editar y guardar una tarea, o cancelar los cambios con el botón o Escape.
 - Eliminar tareas con confirmación; cancelar conserva la tarea.
 - Cambiar entre **Por hacer**, **En progreso** y **Hecho** mediante el selector de estado.
 - Arrastrar desde **⠿ Arrastrar tarea**: soltar sobre una tarjeta la coloca antes de ella; soltar en el espacio de una columna la coloca al final.
 - Ordenar con **Subir** y **Bajar**, también disponibles con teclado y en pantallas táctiles. Durante una búsqueda, se ordenan las tarjetas visibles.
 - Buscar por título o descripción sin distinguir mayúsculas. Los contadores muestran las coincidencias respecto al total de la columna.
+- Filtrar por **Prioridad**, **Responsable** o **Solo mis tareas**, combinables con la búsqueda. Ver [Filtros del tablero](#filtros-del-tablero).
 - Recuperar las tareas, sus estados y su orden después de recargar o navegar fuera del tablero.
 
-Al crear una tarea se limpia la búsqueda para mostrarla en **Por hacer**. La página muestra los estados vacíos y los avisos de acciones.
+Al crear una tarea se limpian la búsqueda y los filtros para mostrarla en **Por hacer**. La página muestra los estados vacíos y los avisos de acciones.
 
 ## Organización
 
@@ -40,12 +41,17 @@ src/
 ├── pages/Home/KanbanPage.jsx      # Estado y composición del tablero
 ├── components/Tareas/
 │   ├── TareaCard.jsx             # Tarjeta, edición, confirmación y controles
-│   └── TareaForm.jsx             # Formulario para crear y editar
+│   ├── TareaForm.jsx             # Formulario para crear y editar
+│   └── FiltrosTablero.jsx        # Búsqueda y filtros del tablero
+├── constants/tareas.js           # Prioridades y equipo temporal
 ├── components/Nav/NavBar.jsx     # Navegación compartida
 ├── services/tareasStorage.js     # Lectura, validación y guardado local
+├── services/tareasApi.js         # Cliente de la API de tareas filtradas (aún sin usar)
+├── utils/filtrarTareas.js        # Filtros con la misma semántica que la API
 └── utils/moverTarea.js           # Movimiento y posición de una tarjeta
 tests/
 ├── tareasStorage.test.js
+├── filtrarTareas.test.js
 └── moverTarea.test.js
 ```
 
@@ -77,6 +83,22 @@ El porcentaje corresponde a tareas completadas sobre el total. Solo llega al 100
 La fuente actual contiene un único proyecto vinculado al tablero existente, definido en `constants/proyectos.js`. No se han creado proyectos ficticios ni persistencia de múltiples tableros. Esta entrega cubre visualización; la creación, edición y eliminación de proyectos y su integración con una API quedan fuera de este alcance.
 
 La lógica de los contadores está en `utils/resumenProyecto.js`, con pruebas en `tests/resumenProyecto.test.js`. Para verificar la vista, crea dos tareas en el tablero y marca una como Hecho: `/proyectos` debe mostrar 50 %, una completada y una pendiente. Comprueba también los filtros, el detalle y Actualizar después de completar la segunda tarea desde otra pestaña.
+
+## Filtros del tablero
+
+La barra de filtros de `/kanban` combina la búsqueda con tres filtros:
+
+| Filtro | Muestra |
+| --- | --- |
+| Prioridad | Solo las tareas de la prioridad elegida |
+| Responsable | Solo las tareas asignadas a ese miembro |
+| Solo mis tareas | Las tareas asignadas al usuario actual; desactiva el selector de responsable |
+
+Las tareas sin responsable solo aparecen cuando no se filtra por responsable. Con algún filtro activo se muestra "Mostrando x de y tareas", los contadores de columna pasan a "x de y" y aparece **Limpiar filtros**. Subir y Bajar ordenan las tarjetas visibles, igual que durante una búsqueda.
+
+**Datos temporales.** Mientras no existan login ni API de usuarios, `constants/tareas.js` define el equipo (`MIEMBROS_EQUIPO`) y el usuario actual (`USUARIO_ACTUAL_ID = 1`, "Yo"). Las tareas guardadas antes de esta funcionalidad se cargan con prioridad media y sin responsable.
+
+**Backend.** `Backend/main` ofrece `GET /api/proyectos/{id}/tareas?prioridad=&responsableId=&soloMias=` y `GET /api/proyectos/{id}/responsables`. "Solo mis tareas" lo resuelve el servidor con el `usuarioId` de la sesión, sin aceptar un id del navegador. `services/tareasApi.js` ya traduce los filtros a esos parámetros y adapta la respuesta al formato del tablero; los pasos para conectarlo están en `docs/requisitos-pendientes.md`.
 
 ## Notificaciones
 
@@ -110,16 +132,17 @@ El arrastre utiliza la función nativa del navegador; en dispositivos donde no e
 3. Cambiar de columna con el selector y mediante arrastre. Probar una columna vacía y soltar antes de otra tarjeta.
 4. Cambiar el orden con Subir/Bajar; en los extremos el botón correspondiente está deshabilitado.
 5. Buscar por descripción y comprobar las coincidencias. Crear con una búsqueda activa y verificar que la tarea nueva aparece.
-6. Cancelar una eliminación y después confirmarla. Recargar y comprobar tareas, estados, orden y eliminaciones.
-7. Navegar por Inicio, Proyectos y Tablero sin perder las tareas.
+6. Asignar prioridades y responsables. Filtrar por prioridad, por responsable y con **Solo mis tareas**, combinarlos con la búsqueda y comprobar los contadores; **Limpiar filtros** muestra de nuevo todas las tareas.
+7. Cancelar una eliminación y después confirmarla. Recargar y comprobar tareas, estados, orden y eliminaciones.
+8. Navegar por Inicio, Proyectos y Tablero sin perder las tareas.
 
 Las diez pruebas automáticas cubren recuperación sin sobrescribir datos dañados, IDs duplicados, validación de campos, cuota excedida y reintento, persistencia del orden, movimiento entre columnas y destinos inexistentes.
 
-Otras cuatro pruebas verifican el resumen de proyectos: sin tareas, por comenzar, avance parcial y completado. Cinco pruebas cubren las solicitudes del cliente de notificaciones, incluyendo sesión, token CSRF y errores. En total, `pnpm test` ejecuta 19 pruebas. Desde `Backend/main`, `mvnw.cmd test` ejecuta otras 10 pruebas con H2.
+Otras cuatro pruebas verifican el resumen de proyectos: sin tareas, por comenzar, avance parcial y completado. Cinco pruebas cubren las solicitudes del cliente de notificaciones, incluyendo sesión, token CSRF y errores. Los filtros añaden cinco pruebas de `filtrarTareas`, una de compatibilidad con tareas antiguas y tres del cliente `tareasApi`. En total, `pnpm test` ejecuta 28 pruebas. Desde `Backend/main`, `mvnw.cmd test` ejecuta otras 18 pruebas con H2, ocho de ellas para la API de tareas filtradas.
 
 ## Commits y reversión
 
-El desarrollo está separado en commits en la rama `Tablero`. Consulta `git log --oneline` para identificar un paso. Para deshacer un commit conservando el historial:
+El desarrollo está separado en commits en las ramas `Tablero` y `Filtros`. Consulta `git log --oneline` para identificar un paso. Para deshacer un commit conservando el historial:
 
 ```sh
 git revert <hash-del-commit>
