@@ -27,6 +27,12 @@ export default function KanbanPage() {
     )))
   }
 
+  function editarTarea(tareaId, { title, description }) {
+    setTareas((actuales) => actuales.map((tarea) => (
+      tarea.id === tareaId ? { ...tarea, title, description } : tarea
+    )))
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar />
@@ -60,6 +66,7 @@ export default function KanbanPage() {
                       tarea={tarea}
                       estados={columns}
                       onCambiarEstado={cambiarEstado}
+                      onEditar={editarTarea}
                     />
                   ))}
                 </div>

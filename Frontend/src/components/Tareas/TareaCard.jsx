@@ -1,6 +1,22 @@
+import { useState } from 'react'
+import TareaForm from './TareaForm'
 
+export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar }){
+  const [editando, setEditando] = useState(false)
 
-export default function TareaCard({ tarea, estados, onCambiarEstado }){
+  if (editando) {
+    return (
+      <TareaForm
+        tarea={tarea}
+        onGuardar={(datos) => {
+          onEditar(tarea.id, datos)
+          setEditando(false)
+        }}
+        onCancelar={() => setEditando(false)}
+      />
+    )
+  }
+
   return (
     <article className="rounded-lg border border-gray-200 bg-gray-50 p-3">
       <h3 className="font-medium wrap-break-word text-gray-900">{tarea.title}</h3>
@@ -22,6 +38,13 @@ export default function TareaCard({ tarea, estados, onCambiarEstado }){
           <option key={estado.id} value={estado.id}>{estado.name}</option>
         ))}
       </select>
+      <button
+        type="button"
+        onClick={() => setEditando(true)}
+        className="mt-3 rounded-lg px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+      >
+        Editar tarea
+      </button>
     </article>
   );
 }
