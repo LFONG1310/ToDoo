@@ -78,6 +78,19 @@ export default function KanbanPage() {
     setColumnaDestino(null)
   }
 
+  function reordenarTarea(tareaId, vecinaId) {
+    setTareas((actuales) => {
+      const origen = actuales.findIndex((tarea) => tarea.id === tareaId)
+      const destino = actuales.findIndex((tarea) => tarea.id === vecinaId)
+      if (origen === -1 || destino === -1 ||
+          actuales[origen].state !== actuales[destino].state) return actuales
+
+      const ordenadas = [...actuales]
+      ;[ordenadas[origen], ordenadas[destino]] = [ordenadas[destino], ordenadas[origen]]
+      return ordenadas
+    })
+  }
+
   function soltarTarea(event, columnId) {
     if (!tareaArrastrada) return
     event.preventDefault()
@@ -150,7 +163,7 @@ export default function KanbanPage() {
                   : 'No hay tareas en esta columna.'}
               </p> : (
                 <div className="mt-4 flex flex-col gap-3">
-                  {tareasVisibles.map((tarea) => (
+                  {tareasVisibles.map((tarea, index) => (
                     <TareaCard
                       key={tarea.id}
                       tarea={tarea}
@@ -160,6 +173,12 @@ export default function KanbanPage() {
                       onEliminar={eliminarTarea}
                       onIniciarArrastre={setTareaArrastrada}
                       onFinalizarArrastre={finalizarArrastre}
+                      onSubir={index > 0
+                        ? () => reordenarTarea(tarea.id, tareasVisibles[index - 1].id)
+                        : undefined}
+                      onBajar={index < tareasVisibles.length - 1
+                        ? () => reordenarTarea(tarea.id, tareasVisibles[index + 1].id)
+                        : undefined}
                     />
                   ))}
                 </div>

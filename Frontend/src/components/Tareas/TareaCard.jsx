@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import TareaForm from './TareaForm'
 
-export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar, onIniciarArrastre, onFinalizarArrastre }){
+export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar, onIniciarArrastre, onFinalizarArrastre, onSubir, onBajar }){
   const [editando, setEditando] = useState(false)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
 
@@ -78,6 +78,26 @@ export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, o
           <option key={estado.id} value={estado.id}>{estado.name}</option>
         ))}
       </select>
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={onSubir}
+          disabled={!onSubir}
+          aria-label={`Subir tarea: ${tarea.title}`}
+          className="rounded-lg px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ↑ Subir
+        </button>
+        <button
+          type="button"
+          onClick={onBajar}
+          disabled={!onBajar}
+          aria-label={`Bajar tarea: ${tarea.title}`}
+          className="rounded-lg px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ↓ Bajar
+        </button>
+      </div>
       <button
         type="button"
         onClick={() => setEditando(true)}
