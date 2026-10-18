@@ -46,9 +46,9 @@ export default function KanbanPage() {
     setMensaje(`Tarea movida a ${columns.find((column) => column.id === nuevoEstado).name}.`)
   }
 
-  function editarTarea(tareaId, { title, description }) {
+  function editarTarea(tareaId, { title, description, prioridad, responsableId }) {
     setTareas((actuales) => actuales.map((tarea) => (
-      tarea.id === tareaId ? { ...tarea, title, description } : tarea
+      tarea.id === tareaId ? { ...tarea, title, description, prioridad, responsableId } : tarea
     )))
     setMensaje('Cambios guardados en la tarea.')
   }

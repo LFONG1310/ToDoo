@@ -1,10 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { MIEMBROS_EQUIPO, PRIORIDAD_POR_DEFECTO, PRIORIDADES } from '../../constants/tareas'
 
 export default function TareaForm({ onCrear, tarea, onGuardar, onCancelar }) {
   const formId = useId()
   const titleRef = useRef(null)
   const [title, setTitle] = useState(tarea?.title ?? '')
   const [description, setDescription] = useState(tarea?.description ?? '')
+  const [prioridad, setPrioridad] = useState(tarea?.prioridad ?? PRIORIDAD_POR_DEFECTO)
+  const [responsableId, setResponsableId] = useState(tarea?.responsableId ?? null)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -19,7 +22,7 @@ export default function TareaForm({ onCrear, tarea, onGuardar, onCancelar }) {
       return
     }
 
-    const datos = { title: title.trim(), description: description.trim() }
+    const datos = { title: title.trim(), description: description.trim(), prioridad, responsableId }
     if (tarea) {
       onGuardar(datos)
       return
@@ -27,6 +30,8 @@ export default function TareaForm({ onCrear, tarea, onGuardar, onCancelar }) {
     onCrear(datos)
     setTitle('')
     setDescription('')
+    setPrioridad(PRIORIDAD_POR_DEFECTO)
+    setResponsableId(null)
     setError('')
     titleRef.current?.focus()
   }
@@ -69,6 +74,35 @@ export default function TareaForm({ onCrear, tarea, onGuardar, onCancelar }) {
         rows={3}
         className="mt-1 w-full rounded-lg border border-gray-300 p-2 focus:outline-blue-700"
       />
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <label htmlFor={`${formId}-prioridad`} className="block text-sm font-medium text-gray-700">
+            Prioridad
+          </label>
+          <select
+            id={`${formId}-prioridad`}
+            value={prioridad}
+            onChange={(event) => setPrioridad(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-gray-300 bg-white p-2 focus:outline-blue-700"
+          >
+            {PRIORIDADES.map((opcion) => <option key={opcion.id} value={opcion.id}>{opcion.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label htmlFor={`${formId}-responsable`} className="block text-sm font-medium text-gray-700">
+            Responsable
+          </label>
+          <select
+            id={`${formId}-responsable`}
+            value={responsableId ?? ''}
+            onChange={(event) => setResponsableId(event.target.value ? Number(event.target.value) : null)}
+            className="mt-1 w-full rounded-lg border border-gray-300 bg-white p-2 focus:outline-blue-700"
+          >
+            <option value="">Sin asignar</option>
+            {MIEMBROS_EQUIPO.map((miembro) => <option key={miembro.id} value={miembro.id}>{miembro.nombre}</option>)}
+          </select>
+        </div>
+      </div>
       <button type="submit" className="mt-3 rounded-lg bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800">
         {tarea ? 'Guardar cambios' : 'Agregar tarea'}
       </button>
