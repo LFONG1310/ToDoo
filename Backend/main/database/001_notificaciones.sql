@@ -9,4 +9,3 @@ CREATE TABLE notificaciones (
     PRIMARY KEY (id),
     INDEX idx_notificaciones_fecha (usuario_id, fecha_creacion, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-

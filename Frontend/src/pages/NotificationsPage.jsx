@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import NotificationBell from '../components/notifications/NotificationBell.jsx'
 import NotificationList from '../components/notifications/NotificationList.jsx'
 import useNotifications from '../hooks/useNotifications.js'
-import todooLogo from '../assets/todoo-logo.png'
+import NavBar from '../components/Nav/NavBar.jsx'
 
 export default function NotificationsPage() {
   const [filter, setFilter] = useState('all')
@@ -15,10 +15,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="notifications-page">
-      <header className="notifications-page-header">
-        <Link to="/" aria-label="ToDoo: ir al inicio">
-          <img src={todooLogo} alt="ToDoo" />
-        </Link>
+      <NavBar>
         <NotificationBell
           notifications={notifications.items}
           onMarkAsRead={notifications.markAsRead}
@@ -26,7 +23,7 @@ export default function NotificationsPage() {
           error={notifications.error}
           pendingId={notifications.pendingId}
         />
-      </header>
+      </NavBar>
       <main className="notifications-page-main">
         <h1>Notificaciones</h1>
         <p className="notifications-page-intro">Consulta las tareas que te han asignado y mantente al dia.</p>
@@ -42,7 +39,7 @@ export default function NotificationsPage() {
             : notifications.error ? (
               <div className="notification-empty" role="alert">
                 <p>{notifications.error.message}</p>
-                {notifications.error.status === 401 && <Link className="notification-read-button" to="/">Ir al inicio de sesion</Link>}
+                {notifications.error.status === 401 && <Link className="notification-read-button" to="/login">Ir al inicio de sesion</Link>}
               </div>
             ) : (
                 <NotificationList
