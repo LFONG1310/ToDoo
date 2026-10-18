@@ -1,5 +1,7 @@
 # ToDoo
 
+Proyecto universitario.
+
 Gestor de tareas por tableros. Los responsables de cada tablero pueden conversar en él sin salir del sistema.
 
 - **Frontend:** React 19 + Vite + Tailwind (`Frontend/`)

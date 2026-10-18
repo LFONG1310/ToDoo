@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import todooLogo from '../assets/todoo-logo.png'
-import { useSesion } from '../sesion/sesionContext.js'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import todooLogo from '../../assets/todoo-logo.png'
+import { useSesion } from '../../sesion/sesionContext.js'
 
 const inputClass =
   'block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 shadow-xs placeholder:text-gray-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300'
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [contrasena, setContrasena] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState('')
-  const destino = location.state?.desde ?? '/tableros'
+  const destino = location.state?.desde ?? '/'
 
   if (usuario && !enviando) {
     return <Navigate to={destino} replace />
@@ -91,7 +91,10 @@ export default function LoginPage() {
                 {enviando ? 'Entrando…' : 'Iniciar sesión'}
               </button>
               <p className="pt-3 text-sm text-gray-600">
-                ¿No tienes una cuenta? Pídele al propietario de tu tablero que te registre.
+                ¿No tienes una cuenta?{' '}
+                <Link to="/register" className="text-blue-700 hover:underline">
+                  Regístrate
+                </Link>
               </p>
             </div>
           </form>
