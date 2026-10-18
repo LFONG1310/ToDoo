@@ -13,7 +13,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.server.ResponseStatusException;
 
 /** Respuestas de error en JSON ({"mensaje": ...}) sin exponer detalles internos. */
-@RestControllerAdvice(basePackages = {"com.todoo.seguridad", "com.todoo.autenticacion", "com.todoo.tableros", "com.todoo.comentarios"})
+@RestControllerAdvice(basePackages = {"com.todoo.seguridad", "com.todoo.autenticacion", "com.todoo.proyectos", "com.todoo.comentarios"})
 public class ErroresApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErroresApi.class);
 

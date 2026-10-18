@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/tableros/{tableroId}/comentarios")
+@RequestMapping("/api/proyectos/{proyectoId}/comentarios")
 public class ComentarioController {
     private final ComentarioService service;
 
@@ -24,35 +24,35 @@ public class ComentarioController {
     }
 
     @GetMapping
-    public List<Comentario> listar(@PathVariable long tableroId,
+    public List<Comentario> listar(@PathVariable long proyectoId,
                                    @RequestAttribute(SesionUsuario.USUARIO_ID) long usuarioId) {
-        return service.listar(tableroId, usuarioId);
+        return service.listar(proyectoId, usuarioId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Comentario crear(@PathVariable long tableroId,
-                            @RequestBody TextoComentario body,
+    public Comentario crear(@PathVariable long proyectoId,
+                            @RequestBody NuevoContenido body,
                             @RequestAttribute(SesionUsuario.USUARIO_ID) long usuarioId) {
-        return service.crear(tableroId, usuarioId, body.texto());
+        return service.crear(proyectoId, usuarioId, body.contenido());
     }
 
     @PatchMapping("/{comentarioId}")
-    public Comentario editar(@PathVariable long tableroId,
+    public Comentario editar(@PathVariable long proyectoId,
                              @PathVariable long comentarioId,
-                             @RequestBody TextoComentario body,
+                             @RequestBody NuevoContenido body,
                              @RequestAttribute(SesionUsuario.USUARIO_ID) long usuarioId) {
-        return service.editar(tableroId, comentarioId, usuarioId, body.texto());
+        return service.editar(proyectoId, comentarioId, usuarioId, body.contenido());
     }
 
     @DeleteMapping("/{comentarioId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable long tableroId,
+    public void eliminar(@PathVariable long proyectoId,
                          @PathVariable long comentarioId,
                          @RequestAttribute(SesionUsuario.USUARIO_ID) long usuarioId) {
-        service.eliminar(tableroId, comentarioId, usuarioId);
+        service.eliminar(proyectoId, comentarioId, usuarioId);
     }
 
-    public record TextoComentario(String texto) {
+    public record NuevoContenido(String contenido) {
     }
 }

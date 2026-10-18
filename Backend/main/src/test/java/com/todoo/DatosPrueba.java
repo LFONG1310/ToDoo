@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.mock.web.MockHttpSession;
 
-/** Ayudas para preparar usuarios, tableros y sesiones en las pruebas de integracion. */
+/** Ayudas para preparar usuarios, proyectos y sesiones con las tablas de propuesta_mysql.sql. */
 public final class DatosPrueba {
     public static final String CONTRASENA = "Secreta123!";
     private static String hashCache;
@@ -25,30 +25,43 @@ public final class DatosPrueba {
     }
 
     public void limpiar() {
-        jdbc.update("DELETE FROM comentarios_tablero");
-        jdbc.update("DELETE FROM tablero_miembros");
-        jdbc.update("DELETE FROM tableros");
+        jdbc.update("DELETE FROM notificaciones");
+        jdbc.update("DELETE FROM comentarios");
+        jdbc.update("DELETE FROM tareas");
+        jdbc.update("DELETE FROM miembros_proyecto");
+        jdbc.update("DELETE FROM proyectos");
         jdbc.update("DELETE FROM usuarios");
     }
 
     public long usuario(String nombre, String correo) {
-        return insertar("INSERT INTO usuarios (nombre, correo, contrasena_hash) VALUES (?, ?, ?)", nombre, correo, hashCache);
+        return insertar("INSERT INTO usuarios (nombre, correo, password_hash) VALUES (?, ?, ?)", nombre, correo, hashCache);
     }
 
-    public long tablero(String nombre, long propietario) {
-        long id = insertar("INSERT INTO tableros (nombre, descripcion, creado_por) VALUES (?, ?, ?)",
-                nombre, "Descripcion de " + nombre, propietario);
-        miembro(id, propietario, "PROPIETARIO");
+    /** Crea el proyecto con su creador como administrador. */
+    public long proyecto(String nombre, long administrador) {
+        long id = insertar("INSERT INTO proyectos (nombre, descripcion, creado_por) VALUES (?, ?, ?)",
+                nombre, "Descripcion de " + nombre, administrador);
+        miembro(id, administrador, "administrador");
         return id;
     }
 
-    public void miembro(long tableroId, long usuarioId, String rol) {
-        jdbc.update("INSERT INTO tablero_miembros (tablero_id, usuario_id, rol) VALUES (?, ?, ?)", tableroId, usuarioId, rol);
+    public void miembro(long proyectoId, long usuarioId, String rol) {
+        jdbc.update("INSERT INTO miembros_proyecto (proyecto_id, usuario_id, rol) VALUES (?, ?, ?)", proyectoId, usuarioId, rol);
     }
 
-    public long comentario(long tableroId, long usuarioId, String texto, LocalDateTime fecha) {
-        return insertar("INSERT INTO comentarios_tablero (tablero_id, usuario_id, texto, fecha_creacion) VALUES (?, ?, ?, ?)",
-                tableroId, usuarioId, texto, fecha);
+    public long tarea(long proyectoId, long responsableId, String titulo) {
+        return insertar("INSERT INTO tareas (proyecto_id, titulo, descripcion, responsable_id, creado_por, fecha_limite)"
+                + " VALUES (?, ?, '', ?, ?, ?)", proyectoId, titulo, responsableId, responsableId, LocalDateTime.of(2026, 12, 1, 12, 0));
+    }
+
+    public long comentario(long proyectoId, long autorId, String contenido, LocalDateTime fecha) {
+        return insertar("INSERT INTO comentarios (proyecto_id, autor_id, contenido, fecha_creacion, fecha_actualizacion)"
+                + " VALUES (?, ?, ?, ?, ?)", proyectoId, autorId, contenido, fecha, fecha);
+    }
+
+    public long comentarioDeTarea(long proyectoId, long tareaId, long autorId, String contenido, LocalDateTime fecha) {
+        return insertar("INSERT INTO comentarios (proyecto_id, tarea_id, autor_id, contenido, fecha_creacion, fecha_actualizacion)"
+                + " VALUES (?, ?, ?, ?, ?, ?)", proyectoId, tareaId, autorId, contenido, fecha, fecha);
     }
 
     public MockHttpSession login(long usuarioId) {

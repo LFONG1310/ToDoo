@@ -1,8 +1,8 @@
-package com.todoo.tableros;
+package com.todoo.proyectos;
 
 import java.util.List;
 
-public record TableroDetalle(
+public record ProyectoDetalle(
         long id,
         String nombre,
         String descripcion,

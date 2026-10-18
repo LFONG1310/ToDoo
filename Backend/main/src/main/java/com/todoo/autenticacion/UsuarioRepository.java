@@ -14,10 +14,10 @@ public class UsuarioRepository {
 
     /** Solo para validar el inicio de sesion: incluye el hash. */
     public Optional<Credencial> buscarCredencial(String correo) {
-        return jdbc.query("SELECT id, nombre, correo, contrasena_hash, activo FROM usuarios WHERE correo = ?",
+        return jdbc.query("SELECT id, nombre, correo, password_hash, activo FROM usuarios WHERE correo = ?",
                 (rs, row) -> new Credencial(
                         new Usuario(rs.getLong("id"), rs.getString("nombre"), rs.getString("correo")),
-                        rs.getString("contrasena_hash"), rs.getBoolean("activo")),
+                        rs.getString("password_hash"), rs.getBoolean("activo")),
                 correo).stream().findFirst();
     }
 
