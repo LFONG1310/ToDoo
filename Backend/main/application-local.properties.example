@@ -1,0 +1,5 @@
+# Copia este archivo como application-local.properties (Git lo ignora) y ajusta los valores.
+# Se lee al ejecutar el backend desde Backend/main (por ejemplo con: mvnw spring-boot:run).
+DB_PASSWORD=CambiaEstaContrasena
+# DB_USER=todoo
+# DB_URL=jdbc:mysql://localhost:3306/todoo?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true

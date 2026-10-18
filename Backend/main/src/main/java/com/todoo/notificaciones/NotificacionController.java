@@ -1,5 +1,6 @@
 package com.todoo.notificaciones;
 
+import com.todoo.seguridad.SesionUsuario;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.List;
@@ -16,9 +17,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/notificaciones")
 public class NotificacionController {
     private final NotificacionService service;
-    private final SesionNotificaciones sesion;
+    private final SesionUsuario sesion;
 
-    public NotificacionController(NotificacionService service, SesionNotificaciones sesion) {
+    public NotificacionController(NotificacionService service, SesionUsuario sesion) {
         this.service = service;
         this.sesion = sesion;
     }

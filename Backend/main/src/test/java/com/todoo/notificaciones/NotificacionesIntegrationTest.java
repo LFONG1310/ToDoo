@@ -1,5 +1,6 @@
 package com.todoo.notificaciones;
 
+import com.todoo.seguridad.SesionUsuario;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class NotificacionesIntegrationTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired NotificacionRepository repository;
     @Autowired NotificacionService service;
-    @Autowired SesionNotificaciones sesion;
+    @Autowired SesionUsuario sesion;
     @Autowired PlatformTransactionManager transactionManager;
     private MockMvc mvc;
 
@@ -41,7 +42,7 @@ class NotificacionesIntegrationTest {
 
     private MockHttpSession login(long id) {
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute(SesionNotificaciones.USUARIO_ID, id);
+        session.setAttribute(SesionUsuario.USUARIO_ID, id);
         return session;
     }
 
