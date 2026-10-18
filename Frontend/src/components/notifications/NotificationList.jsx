@@ -6,14 +6,11 @@ const dateFormatter = new Intl.DateTimeFormat('es-GT', {
 export default function NotificationList({
   notifications = [],
   onMarkAsRead,
+  pendingId = null,
   emptyTitle = 'No tienes notificaciones',
   emptyDescription = 'Cuando te asignen una tarea, aparecera aqui.',
 }) {
-  const orderedNotifications = [...notifications].sort((a, b) =>
-    new Date(b.fecha_creacion) - new Date(a.fecha_creacion) || b.id - a.id,
-  )
-
-  if (orderedNotifications.length === 0) {
+  if (notifications.length === 0) {
     return (
       <div className="notification-empty">
         <strong>{emptyTitle}</strong>
@@ -24,7 +21,7 @@ export default function NotificationList({
 
   return (
     <ul className="notification-list">
-      {orderedNotifications.map((notification) => (
+      {notifications.map((notification) => (
         <li key={notification.id} className={`notification-item ${notification.leida ? '' : 'notification-unread'}`}>
           <div className="notification-item-meta">
             <span>{notification.leida ? 'Leida' : 'Sin leer'}</span>
@@ -37,10 +34,11 @@ export default function NotificationList({
             <button
               type="button"
               className="notification-read-button"
+              disabled={pendingId !== null}
               onClick={() => onMarkAsRead(notification.id)}
               aria-label={`Marcar como leida: ${notification.mensaje}`}
             >
-              Marcar como leida
+              {pendingId === notification.id ? 'Guardando...' : 'Marcar como leida'}
             </button>
           )}
         </li>

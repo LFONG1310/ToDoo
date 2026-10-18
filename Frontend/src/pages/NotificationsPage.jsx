@@ -1,31 +1,28 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import NotificationBell from '../components/notifications/NotificationBell.jsx'
 import NotificationList from '../components/notifications/NotificationList.jsx'
+import useNotifications from '../hooks/useNotifications.js'
 import NavBar from '../components/Nav/NavBar.jsx'
 
-export default function NotificationsPage({ initialNotifications = [] }) {
-  const [notifications, setNotifications] = useState(initialNotifications)
+export default function NotificationsPage() {
   const [filter, setFilter] = useState('all')
-  const [feedback, setFeedback] = useState('')
-  const unreadCount = notifications.filter((notification) => !notification.leida).length
+  const notifications = useNotifications()
+  const unreadCount = notifications.items.filter((item) => !item.leida).length
   const visibleNotifications = filter === 'unread'
-    ? notifications.filter((notification) => !notification.leida)
-    : notifications
-
-  function markAsRead(id) {
-    const readAt = new Date().toISOString()
-    setNotifications((current) => current.map((notification) =>
-      notification.id === id && !notification.leida
-        ? { ...notification, leida: true, fecha_lectura: readAt }
-        : notification,
-    ))
-    setFeedback('Notificacion marcada como leida.')
-  }
+    ? notifications.items.filter((item) => !item.leida)
+    : notifications.items
 
   return (
     <div className="notifications-page">
       <NavBar>
-        <NotificationBell notifications={notifications} onMarkAsRead={markAsRead} />
+        <NotificationBell
+          notifications={notifications.items}
+          onMarkAsRead={notifications.markAsRead}
+          loading={notifications.loading}
+          error={notifications.error}
+          pendingId={notifications.pendingId}
+        />
       </NavBar>
       <main className="notifications-page-main">
         <h1>Notificaciones</h1>
@@ -34,18 +31,27 @@ export default function NotificationsPage({ initialNotifications = [] }) {
           <div className="notifications-toolbar">
             <div className="notifications-filters" role="group" aria-label="Filtrar notificaciones">
               <button type="button" aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>Todas</button>
-              <button type="button" aria-pressed={filter === 'unread'} onClick={() => setFilter('unread')}>Sin leer ({unreadCount})</button>
+              <button type="button" aria-pressed={filter === 'unread'} onClick={() => setFilter('unread')}>Sin leer{!notifications.loading && !notifications.error ? ` (${unreadCount})` : ''}</button>
             </div>
-            <span className="notifications-total">{notifications.length} {notifications.length === 1 ? 'notificacion' : 'notificaciones'}</span>
+            <button type="button" className="notification-read-button" disabled={notifications.loading || notifications.pendingId !== null} onClick={notifications.reload}>Actualizar</button>
           </div>
-          <NotificationList
-            notifications={visibleNotifications}
-            onMarkAsRead={markAsRead}
-            emptyTitle={filter === 'unread' ? 'No tienes notificaciones sin leer' : 'No tienes notificaciones'}
-            emptyDescription={filter === 'unread' ? 'Estas al dia con tus avisos.' : 'Cuando te asignen una tarea, aparecera aqui.'}
-          />
+          {notifications.loading ? <p className="notification-empty" role="status">Cargando notificaciones...</p>
+            : notifications.error ? (
+              <div className="notification-empty" role="alert">
+                <p>{notifications.error.message}</p>
+                {notifications.error.status === 401 && <Link className="notification-read-button" to="/login">Ir al inicio de sesion</Link>}
+              </div>
+            ) : (
+                <NotificationList
+                  notifications={visibleNotifications}
+                  onMarkAsRead={notifications.markAsRead}
+                  pendingId={notifications.pendingId}
+                  emptyTitle={filter === 'unread' ? 'No tienes notificaciones sin leer' : 'No tienes notificaciones'}
+                  emptyDescription={filter === 'unread' ? 'Estas al dia con tus avisos.' : 'Cuando te asignen una tarea, aparecera aqui.'}
+                />
+            )}
         </section>
-        <p className="notifications-feedback" role="status">{feedback}</p>
+        <p className="notifications-feedback" role="status">{notifications.feedback}</p>
       </main>
     </div>
   )

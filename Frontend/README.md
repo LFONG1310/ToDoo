@@ -87,11 +87,13 @@ La rama `notificaciones` se integra conservando las rutas existentes de inicio, 
 - Marcar como leída actualiza la bandeja y la campana; Escape cierra el desplegable y devuelve el foco.
 - Estados vacíos y mensajes de confirmación.
 
-Esta rama aporta los componentes de interfaz. `NotificationsPage` recibe los datos mediante `initialNotifications` y mantiene la lectura en memoria; todavía no consulta una API ni persiste los cambios al recargar. El backend de notificaciones no se integra en este merge. Sin una fuente de datos conectada, la bandeja muestra su estado vacío.
+La rama `notificaciones-backend` añade la API y `useNotifications`. La bandeja consulta `GET /api/notificaciones`, obtiene el token CSRF y guarda la lectura mediante `PATCH /api/notificaciones/{id}/leida`. Las solicitudes usan la sesión del servidor; el futuro login debe establecer `usuarioId` tras autenticar al usuario. Un 401 dirige a `/login`, y los fallos de conexión muestran un error con opción para actualizar. El proxy de desarrollo envía `/api` a `127.0.0.1:8080`.
+
+El backend está configurado para MySQL mediante `DB_URL`, `DB_USER` y `DB_PASSWORD`. La base aún debe definirse y crearse; Spring no ejecuta el SQL automáticamente. Las pruebas del backend usan H2 en memoria. Los próximos requisitos y las instrucciones de configuración se conservan en `docs/requisitos-pendientes.md`, en la raíz del repositorio.
 
 Se conservó `pages/Auth/LoginPage.jsx` y se descartó su copia en `pages/LoginPage.jsx`. También se conservaron la documentación previa y el `.gitignore` de la raíz. La campana se añadió como contenido opcional de `NavBar` en la página de notificaciones.
 
-La integración se comprobó en el navegador con datos temporales para verificar orden, filtros, lectura desde bandeja y campana, contadores y Escape. Los archivos temporales de prueba se retiraron antes del commit.
+La integración inicial de la interfaz se comprobó en el navegador con datos temporales para verificar orden, filtros, lectura desde bandeja y campana, contadores y Escape. La integración del backend añade pruebas para sesión, CSRF, aislamiento entre usuarios, lectura persistente y creación transaccional del aviso al asignar. La llamada desde el futuro servicio de tareas todavía está pendiente.
 
 ## Almacenamiento y alcance
 
@@ -113,7 +115,7 @@ El arrastre utiliza la función nativa del navegador; en dispositivos donde no e
 
 Las diez pruebas automáticas cubren recuperación sin sobrescribir datos dañados, IDs duplicados, validación de campos, cuota excedida y reintento, persistencia del orden, movimiento entre columnas y destinos inexistentes.
 
-Otras cuatro pruebas verifican el resumen de proyectos: sin tareas, por comenzar, avance parcial y completado. En total, `pnpm test` ejecuta 14 pruebas.
+Otras cuatro pruebas verifican el resumen de proyectos: sin tareas, por comenzar, avance parcial y completado. Cinco pruebas cubren las solicitudes del cliente de notificaciones, incluyendo sesión, token CSRF y errores. En total, `pnpm test` ejecuta 19 pruebas. Desde `Backend/main`, `mvnw.cmd test` ejecuta otras 10 pruebas con H2.
 
 ## Commits y reversión
 
