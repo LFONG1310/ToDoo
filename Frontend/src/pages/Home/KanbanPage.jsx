@@ -3,6 +3,7 @@ import { useState } from 'react'
 import TareaCard from '../../components/Tareas/TareaCard'
 import TareaForm from '../../components/Tareas/TareaForm'
 import { cargarTablero, guardarTareas } from '../../services/tareasStorage'
+import { moverTarea } from '../../utils/moverTarea'
 
 const columns = [
   { id: 'todo', name: 'Por hacer' },
@@ -35,12 +36,10 @@ export default function KanbanPage() {
     ])
   }
 
-  function cambiarEstado(tareaId, nuevoEstado) {
+  function cambiarEstado(tareaId, nuevoEstado, antesDeId) {
     if (!columns.some((column) => column.id === nuevoEstado)) return
 
-    setTareas((actuales) => actuales.map((tarea) => (
-      tarea.id === tareaId ? { ...tarea, state: nuevoEstado } : tarea
-    )))
+    setTareas((actuales) => moverTarea(actuales, tareaId, nuevoEstado, antesDeId))
   }
 
   function editarTarea(tareaId, { title, description }) {
@@ -71,11 +70,12 @@ export default function KanbanPage() {
     })
   }
 
-  function soltarTarea(event, columnId) {
+  function soltarTarea(event, columnId, antesDeId) {
     if (!tareaArrastrada) return
     event.preventDefault()
+    event.stopPropagation()
     if (event.dataTransfer.getData('text/plain') === tareaArrastrada) {
-      cambiarEstado(tareaArrastrada, columnId)
+      cambiarEstado(tareaArrastrada, columnId, antesDeId)
     }
     finalizarArrastre()
   }
@@ -128,7 +128,7 @@ export default function KanbanPage() {
                 setColumnaDestino(column.id)
               }}
               onDragLeave={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget)) {
+                if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
                   setColumnaDestino(null)
                 }
               }}
@@ -161,6 +161,8 @@ export default function KanbanPage() {
                       onEliminar={eliminarTarea}
                       onIniciarArrastre={setTareaArrastrada}
                       onFinalizarArrastre={finalizarArrastre}
+                      arrastrando={Boolean(tareaArrastrada)}
+                      onSoltar={soltarTarea}
                       onSubir={index > 0
                         ? () => reordenarTarea(tarea.id, tareasVisibles[index - 1].id)
                         : undefined}

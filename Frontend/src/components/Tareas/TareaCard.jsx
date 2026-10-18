@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import TareaForm from './TareaForm'
 
-export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar, onIniciarArrastre, onFinalizarArrastre, onSubir, onBajar }){
+export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar, onIniciarArrastre, onFinalizarArrastre, onSubir, onBajar, arrastrando, onSoltar }){
   const [editando, setEditando] = useState(false)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
 
@@ -19,7 +19,17 @@ export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, o
   }
 
   return (
-    <article className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+    <article
+      onDragOver={(event) => {
+        if (!arrastrando) return
+        event.preventDefault()
+        event.dataTransfer.dropEffect = 'move'
+      }}
+      onDrop={(event) => onSoltar(event, tarea.state, tarea.id)}
+      className={`rounded-lg border border-gray-200 bg-gray-50 p-3 ${
+        arrastrando ? 'hover:border-t-blue-600 hover:border-t-4' : ''
+      }`}
+    >
       <h3 className="font-medium wrap-break-word text-gray-900">{tarea.title}</h3>
       {!confirmandoEliminar && (
         <span
