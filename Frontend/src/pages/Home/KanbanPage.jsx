@@ -1,5 +1,5 @@
 import NavBar from '../../components/Nav/NavBar'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TareaCard from '../../components/Tareas/TareaCard'
 import TareaForm from '../../components/Tareas/TareaForm'
 
@@ -9,8 +9,40 @@ const columns = [
   { id: 'done', name: 'Hecho' },
 ]
 
+const STORAGE_KEY = 'todoo.kanban.tareas'
+
+function cargarTareas() {
+  try {
+    const guardadas = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
+    if (!Array.isArray(guardadas)) return []
+
+    const ids = new Set()
+    return guardadas.filter((tarea) => {
+      const valida = tarea &&
+        typeof tarea.id === 'string' && tarea.id.length > 0 &&
+        !ids.has(tarea.id) &&
+        typeof tarea.title === 'string' && tarea.title.trim().length > 0 &&
+        typeof tarea.description === 'string' &&
+        columns.some((column) => column.id === tarea.state)
+
+      if (valida) ids.add(tarea.id)
+      return valida
+    })
+  } catch {
+    return []
+  }
+}
+
 export default function KanbanPage() {
-  const [tareas, setTareas] = useState([])
+  const [tareas, setTareas] = useState(cargarTareas)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tareas))
+    } catch {
+      console.warn('No se pudieron guardar las tareas en este navegador.')
+    }
+  }, [tareas])
 
   function crearTarea(datos) {
     setTareas((actuales) => [
