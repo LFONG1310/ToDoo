@@ -78,6 +78,21 @@ La fuente actual contiene un único proyecto vinculado al tablero existente, def
 
 La lógica de los contadores está en `utils/resumenProyecto.js`, con pruebas en `tests/resumenProyecto.test.js`. Para verificar la vista, crea dos tareas en el tablero y marca una como Hecho: `/proyectos` debe mostrar 50 %, una completada y una pendiente. Comprueba también los filtros, el detalle y Actualizar después de completar la segunda tarea desde otra pestaña.
 
+## Notificaciones
+
+La rama `notificaciones` se integra conservando las rutas existentes de inicio, autenticación, proyectos y tablero. La bandeja está en `/notificaciones` y se puede abrir desde la navegación compartida.
+
+- Bandeja ordenada de más reciente a más antigua, con filtros Todas y Sin leer.
+- Campana desplegable con contador y lectura desde el panel.
+- Marcar como leída actualiza la bandeja y la campana; Escape cierra el desplegable y devuelve el foco.
+- Estados vacíos y mensajes de confirmación.
+
+Esta rama aporta los componentes de interfaz. `NotificationsPage` recibe los datos mediante `initialNotifications` y mantiene la lectura en memoria; todavía no consulta una API ni persiste los cambios al recargar. El backend de notificaciones no se integra en este merge. Sin una fuente de datos conectada, la bandeja muestra su estado vacío.
+
+Se conservó `pages/Auth/LoginPage.jsx` y se descartó su copia en `pages/LoginPage.jsx`. También se conservaron la documentación previa y el `.gitignore` de la raíz. La campana se añadió como contenido opcional de `NavBar` en la página de notificaciones.
+
+La integración se comprobó en el navegador con datos temporales para verificar orden, filtros, lectura desde bandeja y campana, contadores y Escape. Los archivos temporales de prueba se retiraron antes del commit.
+
 ## Almacenamiento y alcance
 
 Este es un tablero de frontend, sin integración con la API ni autenticación. Las tareas se guardan en `localStorage` con la clave `todoo.kanban.tareas`, compartidas por las pestañas de la misma dirección, navegador y perfil. Abrir otra dirección o puerto usa un almacenamiento distinto. Las pestañas abiertas simultáneamente no sincronizan sus cambios en tiempo real.
