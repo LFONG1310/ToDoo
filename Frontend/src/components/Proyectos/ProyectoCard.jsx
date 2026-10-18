@@ -32,7 +32,7 @@ export default function ProyectoCard({ proyecto, tareas }) {
             aria-label={`Avance de ${proyecto.name}`}
             value={resumen.hechas}
             max={resumen.total || 1}
-            className="mt-2 h-2 w-full overflow-hidden rounded-full accent-blue-700"
+            className="mt-2 h-2 w-full appearance-none overflow-hidden rounded-full [&::-webkit-progress-bar]:bg-blue-100 [&::-webkit-progress-value]:bg-blue-700 [&::-moz-progress-bar]:bg-blue-700"
           />
           <p className="mt-1 text-xs text-gray-500">{resumen.hechas} de {resumen.total} tareas completadas</p>
         </div>

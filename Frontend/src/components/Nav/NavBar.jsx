@@ -7,8 +7,8 @@ export default function NavBar() {
       <Link to="/" aria-label="ToDoo: inicio">
         <img src={todooLogo} alt="ToDoo" className="w-25 h-14 object-contain" />
       </Link>
-      <div className="flex flex-row justify-between items-center gap-4 w-full">
-        <ul className="flex justify-center items-center gap-4">
+      <div className="flex flex-row flex-wrap justify-between items-center gap-4 w-full">
+        <ul className="flex flex-wrap justify-center items-center gap-4">
           <li>
             <NavLink to="/" end className={({ isActive }) => isActive ? 'font-semibold text-blue-700' : 'hover:text-blue-700'}>Inicio</NavLink>
           </li>
@@ -19,7 +19,7 @@ export default function NavBar() {
             <NavLink to="/kanban" className={({ isActive }) => isActive ? 'font-semibold text-blue-700' : 'hover:text-blue-700'}>Tablero</NavLink>
           </li>
         </ul>
-        <button>Cerrar sesión</button>
+        <button className="whitespace-nowrap">Cerrar sesión</button>
       </div>
     </nav>
   );

@@ -6,7 +6,9 @@ import { ESTADOS_PROYECTO, PROYECTO_PRINCIPAL } from '../../constants/proyectos'
 import { resumenProyecto } from '../../utils/resumenProyecto'
 
 export default function ProyectosPage() {
-  const [{ tareas, error }] = useState(() => cargarTablero())
+  const [tablero, setTablero] = useState(() => cargarTablero())
+  const { tareas, error } = tablero
+  const [actualizado, setActualizado] = useState(false)
   const [busqueda, setBusqueda] = useState('')
   const [estado, setEstado] = useState('todos')
   const proyectos = [{ ...PROYECTO_PRINCIPAL, tareas }]
@@ -21,11 +23,21 @@ export default function ProyectosPage() {
     setBusqueda('')
     setEstado('todos')
   }
+
+  function actualizarProyectos() {
+    setTablero(cargarTablero())
+    setActualizado(true)
+  }
   return(
     <div className="min-h-screen bg-gray-100">
       <NavBar />
       <main className="mx-auto max-w-7xl p-4 sm:p-6">
-        <h1 className="mb-6 text-2xl font-bold text-blue-800">Proyectos</h1>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-blue-800">Proyectos</h1>
+          <button type="button" onClick={actualizarProyectos} className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50">
+            Actualizar proyectos
+          </button>
+        </div>
         <p className="mb-6 text-gray-600">Consulta el avance de tus tareas y accede al tablero del proyecto.</p>
         {error && <p role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{error}</p>}
         <dl aria-label="Resumen de proyectos" className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -57,7 +69,10 @@ export default function ProyectosPage() {
             <button type="button" onClick={limpiarFiltros} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50">Limpiar filtros</button>
           )}
         </div>
-        <p role="status" className="mb-4 text-sm text-gray-600">Mostrando {visibles.length} de {proyectos.length} proyectos</p>
+        <p role="status" className="mb-4 text-sm text-gray-600">
+          Mostrando {visibles.length} de {proyectos.length} {proyectos.length === 1 ? 'proyecto' : 'proyectos'}.
+          {actualizado && !error && ' Resumen actualizado.'}
+        </p>
         {visibles.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {visibles.map((proyecto) => <ProyectoCard key={proyecto.id} proyecto={proyecto} tareas={proyecto.tareas} />)}
