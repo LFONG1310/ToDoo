@@ -1,7 +1,8 @@
 import NavBar from '../../components/Nav/NavBar'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import TareaCard from '../../components/Tareas/TareaCard'
 import TareaForm from '../../components/Tareas/TareaForm'
+import { cargarTablero, guardarTareas } from '../../services/tareasStorage'
 
 const columns = [
   { id: 'todo', name: 'Por hacer' },
@@ -9,44 +10,23 @@ const columns = [
   { id: 'done', name: 'Hecho' },
 ]
 
-const STORAGE_KEY = 'todoo.kanban.tareas'
-
-function cargarTareas() {
-  try {
-    const guardadas = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-    if (!Array.isArray(guardadas)) return []
-
-    const ids = new Set()
-    return guardadas.filter((tarea) => {
-      const valida = tarea &&
-        typeof tarea.id === 'string' && tarea.id.length > 0 &&
-        !ids.has(tarea.id) &&
-        typeof tarea.title === 'string' && tarea.title.trim().length > 0 &&
-        typeof tarea.description === 'string' &&
-        columns.some((column) => column.id === tarea.state)
-
-      if (valida) ids.add(tarea.id)
-      return valida
-    })
-  } catch {
-    return []
-  }
-}
-
 export default function KanbanPage() {
-  const [tareas, setTareas] = useState(cargarTareas)
+  const [tablero, setTablero] = useState(() => cargarTablero())
+  const { tareas, error } = tablero
   const [tareaArrastrada, setTareaArrastrada] = useState(null)
   const [columnaDestino, setColumnaDestino] = useState(null)
   const [busqueda, setBusqueda] = useState('')
   const consulta = busqueda.trim().toLocaleLowerCase('es')
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tareas))
-    } catch {
-      console.warn('No se pudieron guardar las tareas en este navegador.')
-    }
-  }, [tareas])
+  function setTareas(actualizar) {
+    const nuevas = actualizar(tareas)
+    if (nuevas === tareas) return
+    setTablero({ tareas: nuevas, error: guardarTareas(nuevas) })
+  }
+
+  function reintentarGuardado() {
+    setTablero({ tareas, error: guardarTareas(tareas) })
+  }
 
   function crearTarea(datos) {
     setTareas((actuales) => [
@@ -105,6 +85,14 @@ export default function KanbanPage() {
       <NavBar />
       <main className="mx-auto max-w-7xl p-4 sm:p-6">
         <h1 className="mb-6 text-2xl font-bold text-blue-800">Mi tablero de tareas</h1>
+        {error && (
+          <div role="alert" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            <p>{error}</p>
+            <button type="button" onClick={reintentarGuardado} className="mt-2 rounded px-3 py-2 font-semibold underline">
+              Guardar tablero actual
+            </button>
+          </div>
+        )}
         <TareaForm onCrear={crearTarea} />
         <div className="mb-6">
           <label htmlFor="buscar-tareas" className="mb-1 block text-sm font-medium text-gray-700">
