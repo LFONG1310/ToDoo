@@ -37,6 +37,8 @@ export default function KanbanPage() {
   const [tareas, setTareas] = useState(cargarTareas)
   const [tareaArrastrada, setTareaArrastrada] = useState(null)
   const [columnaDestino, setColumnaDestino] = useState(null)
+  const [busqueda, setBusqueda] = useState('')
+  const consulta = busqueda.trim().toLocaleLowerCase('es')
 
   useEffect(() => {
     try {
@@ -91,9 +93,29 @@ export default function KanbanPage() {
       <main className="mx-auto max-w-7xl p-4 sm:p-6">
         <h1 className="mb-6 text-2xl font-bold text-blue-800">Mi tablero de tareas</h1>
         <TareaForm onCrear={crearTarea} />
+        <div className="mb-6">
+          <label htmlFor="buscar-tareas" className="mb-1 block text-sm font-medium text-gray-700">
+            Buscar tareas
+          </label>
+          <input
+            id="buscar-tareas"
+            type="search"
+            value={busqueda}
+            onChange={(event) => setBusqueda(event.target.value)}
+            placeholder="Buscar por título o descripción"
+            className="w-full rounded-lg border border-gray-300 bg-white p-2 focus:outline-blue-700"
+          />
+        </div>
         <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
           {columns.map((column) => {
             const tareasColumna = tareas.filter((tarea) => tarea.state === column.id)
+            const tareasVisibles = tareasColumna.filter((tarea) => (
+              tarea.title.toLocaleLowerCase('es').includes(consulta) ||
+              tarea.description.toLocaleLowerCase('es').includes(consulta)
+            ))
+            const contador = consulta
+              ? `${tareasVisibles.length} de ${tareasColumna.length}`
+              : tareasColumna.length
             return (
             <section
               key={column.id}
@@ -118,15 +140,17 @@ export default function KanbanPage() {
                 <h2 id={`column-${column.id}`} className="font-semibold text-blue-800">
                   {column.name}
                 </h2>
-                <span aria-label={`${tareasColumna.length} tareas`} className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-                  {tareasColumna.length}
+                <span aria-label={`${contador} tareas`} className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                  {contador}
                 </span>
               </header>
-              {tareasColumna.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">
-                No hay tareas en esta columna.
+              {tareasVisibles.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">
+                {consulta && tareasColumna.length > 0
+                  ? 'No hay tareas que coincidan con la búsqueda.'
+                  : 'No hay tareas en esta columna.'}
               </p> : (
                 <div className="mt-4 flex flex-col gap-3">
-                  {tareasColumna.map((tarea) => (
+                  {tareasVisibles.map((tarea) => (
                     <TareaCard
                       key={tarea.id}
                       tarea={tarea}
