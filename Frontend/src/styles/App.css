@@ -63,6 +63,9 @@
 
 .boton-texto {
   padding: 4px 2px;
+  border: 0;
+  background: none;
+  cursor: pointer;
   color: var(--azul-hover);
   font-size: 13px;
   font-weight: 700;
@@ -104,6 +107,7 @@
 
 .encabezado-nav a {
   padding: 8px 12px;
+  text-decoration: none;
   border-radius: 8px;
   color: var(--texto-suave);
   font-weight: 600;
@@ -185,6 +189,8 @@
 }
 
 .tarjeta-tablero {
+  color: inherit;
+  text-decoration: none;
   display: flex;
   flex-direction: column;
   gap: 8px;
