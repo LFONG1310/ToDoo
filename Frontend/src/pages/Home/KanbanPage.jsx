@@ -33,6 +33,10 @@ export default function KanbanPage() {
     )))
   }
 
+  function eliminarTarea(tareaId) {
+    setTareas((actuales) => actuales.filter((tarea) => tarea.id !== tareaId))
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar />
@@ -67,6 +71,7 @@ export default function KanbanPage() {
                       estados={columns}
                       onCambiarEstado={cambiarEstado}
                       onEditar={editarTarea}
+                      onEliminar={eliminarTarea}
                     />
                   ))}
                 </div>

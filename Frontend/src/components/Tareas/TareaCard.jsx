@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import TareaForm from './TareaForm'
 
-export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar }){
+export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar }){
   const [editando, setEditando] = useState(false)
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
 
   if (editando) {
     return (
@@ -25,6 +26,30 @@ export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar })
           {tarea.description}
         </p>
       )}
+      {confirmandoEliminar ? (
+        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+          <p role="alert" className="text-sm text-red-800">
+            ¿Eliminar esta tarea? Esta acción no se puede deshacer.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmandoEliminar(false)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={() => onEliminar(tarea.id)}
+              className="rounded-lg bg-red-700 px-3 py-2 text-sm font-medium text-white hover:bg-red-800"
+            >
+              Confirmar eliminación
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
       <label htmlFor={`estado-${tarea.id}`} className="mt-3 block text-sm font-medium text-gray-700">
         Estado
       </label>
@@ -45,6 +70,15 @@ export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar })
       >
         Editar tarea
       </button>
+      <button
+        type="button"
+        onClick={() => setConfirmandoEliminar(true)}
+        className="mt-3 rounded-lg px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+      >
+        Eliminar tarea
+      </button>
+        </>
+      )}
     </article>
   );
 }
