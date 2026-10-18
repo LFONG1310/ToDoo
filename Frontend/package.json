@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test src/services/notificationsApi.test.js",
+    "test": "node --test src/services/notificationsApi.test.js src/services/authApi.test.js src/services/comentariosApi.test.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
