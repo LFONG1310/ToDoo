@@ -2,6 +2,12 @@ import { Link } from 'react-router-dom'
 import { ESTADOS_PROYECTO } from '../../constants/proyectos'
 import { resumenProyecto } from '../../utils/resumenProyecto'
 
+const ESTADOS_TAREA = {
+  todo: 'Por hacer',
+  'in-progress': 'En progreso',
+  done: 'Hecho',
+}
+
 export default function ProyectoCard({ proyecto, tareas }) {
   const resumen = resumenProyecto(tareas)
   const estado = ESTADOS_PROYECTO[resumen.estado]
@@ -36,6 +42,22 @@ export default function ProyectoCard({ proyecto, tareas }) {
           <div><dt className="text-xs text-gray-600">Hecho</dt><dd className="mt-1 text-lg font-bold text-green-800">{resumen.hechas}</dd></div>
         </dl>
         {resumen.total === 0 && <p className="mb-4 text-sm text-gray-500">Este proyecto aún no tiene tareas. Agrega la primera desde su tablero.</p>}
+        {resumen.total > 0 && (
+          <details className="mb-5 rounded-lg border border-gray-200">
+            <summary className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold text-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700">
+              Ver tareas ({resumen.total})
+            </summary>
+            <ul aria-label={`Tareas de ${proyecto.name}`} className="max-h-64 overflow-y-auto divide-y divide-gray-100 px-3">
+              {tareas.map((tarea) => (
+                <li key={tarea.id} className="py-3">
+                  <p className="text-sm font-medium wrap-break-word text-gray-900">{tarea.title}</p>
+                  <span className="text-xs text-gray-500">{ESTADOS_TAREA[tarea.state]}</span>
+                  {tarea.description && <p className="mt-1 whitespace-pre-wrap text-xs wrap-break-word text-gray-600">{tarea.description}</p>}
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
         <Link to={proyecto.boardUrl} className="mt-auto inline-block rounded-lg bg-blue-700 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
           Abrir tablero
         </Link>
