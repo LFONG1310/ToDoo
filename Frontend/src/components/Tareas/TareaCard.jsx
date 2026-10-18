@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import TareaForm from './TareaForm'
 
-export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar }){
+export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar, onIniciarArrastre, onFinalizarArrastre }){
   const [editando, setEditando] = useState(false)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
 
@@ -21,6 +21,21 @@ export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, o
   return (
     <article className="rounded-lg border border-gray-200 bg-gray-50 p-3">
       <h3 className="font-medium wrap-break-word text-gray-900">{tarea.title}</h3>
+      {!confirmandoEliminar && (
+        <span
+          draggable
+          onDragStart={(event) => {
+            event.dataTransfer.setData('text/plain', tarea.id)
+            event.dataTransfer.effectAllowed = 'move'
+            onIniciarArrastre(tarea.id)
+          }}
+          onDragEnd={onFinalizarArrastre}
+          className="mt-2 inline-block cursor-grab rounded px-2 py-1 text-xs text-blue-700 active:cursor-grabbing"
+          title="También puedes usar el selector Estado para mover la tarea"
+        >
+          ⠿ Arrastrar tarea
+        </span>
+      )}
       {tarea.description && (
         <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm text-gray-600">
           {tarea.description}

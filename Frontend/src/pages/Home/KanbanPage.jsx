@@ -35,6 +35,8 @@ function cargarTareas() {
 
 export default function KanbanPage() {
   const [tareas, setTareas] = useState(cargarTareas)
+  const [tareaArrastrada, setTareaArrastrada] = useState(null)
+  const [columnaDestino, setColumnaDestino] = useState(null)
 
   useEffect(() => {
     try {
@@ -69,6 +71,20 @@ export default function KanbanPage() {
     setTareas((actuales) => actuales.filter((tarea) => tarea.id !== tareaId))
   }
 
+  function finalizarArrastre() {
+    setTareaArrastrada(null)
+    setColumnaDestino(null)
+  }
+
+  function soltarTarea(event, columnId) {
+    if (!tareaArrastrada) return
+    event.preventDefault()
+    if (event.dataTransfer.getData('text/plain') === tareaArrastrada) {
+      cambiarEstado(tareaArrastrada, columnId)
+    }
+    finalizarArrastre()
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar />
@@ -82,7 +98,21 @@ export default function KanbanPage() {
             <section
               key={column.id}
               aria-labelledby={`column-${column.id}`}
-              className="min-h-64 rounded-xl bg-white p-4 shadow-sm"
+              onDragOver={(event) => {
+                if (!tareaArrastrada) return
+                event.preventDefault()
+                event.dataTransfer.dropEffect = 'move'
+                setColumnaDestino(column.id)
+              }}
+              onDragLeave={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                  setColumnaDestino(null)
+                }
+              }}
+              onDrop={(event) => soltarTarea(event, column.id)}
+              className={`min-h-64 rounded-xl bg-white p-4 shadow-sm ${
+                columnaDestino === column.id ? 'ring-2 ring-blue-500' : ''
+              }`}
             >
               <header className="flex items-center justify-between gap-2">
                 <h2 id={`column-${column.id}`} className="font-semibold text-blue-800">
@@ -104,6 +134,8 @@ export default function KanbanPage() {
                       onCambiarEstado={cambiarEstado}
                       onEditar={editarTarea}
                       onEliminar={eliminarTarea}
+                      onIniciarArrastre={setTareaArrastrada}
+                      onFinalizarArrastre={finalizarArrastre}
                     />
                   ))}
                 </div>
