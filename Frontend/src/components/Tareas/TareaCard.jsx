@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import TareaForm from './TareaForm'
+import { MIEMBROS_EQUIPO, PRIORIDADES } from '../../constants/tareas'
 
 export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, onEliminar, onIniciarArrastre, onFinalizarArrastre, onSubir, onBajar, arrastrando, onSoltar }){
   const [editando, setEditando] = useState(false)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
+
+  const prioridad = PRIORIDADES.find((opcion) => opcion.id === tarea.prioridad)
+  const responsable = MIEMBROS_EQUIPO.find((miembro) => miembro.id === tarea.responsableId)
 
   if (editando) {
     return (
@@ -31,6 +35,16 @@ export default function TareaCard({ tarea, estados, onCambiarEstado, onEditar, o
       }`}
     >
       <h3 className="font-medium wrap-break-word text-gray-900">{tarea.title}</h3>
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        {prioridad && (
+          <span className={`rounded-full px-2 py-1 font-medium ${prioridad.className}`}>
+            Prioridad {prioridad.name.toLocaleLowerCase('es')}
+          </span>
+        )}
+        <span className="text-gray-600">
+          {responsable ? `Responsable: ${responsable.nombre}` : 'Sin responsable'}
+        </span>
+      </div>
       {!confirmandoEliminar && (
         <span
           draggable

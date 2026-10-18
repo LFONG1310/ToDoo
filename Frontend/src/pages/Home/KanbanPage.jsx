@@ -2,8 +2,11 @@ import NavBar from '../../components/Nav/NavBar'
 import { useState } from 'react'
 import TareaCard from '../../components/Tareas/TareaCard'
 import TareaForm from '../../components/Tareas/TareaForm'
+import FiltrosTablero from '../../components/Tareas/FiltrosTablero'
+import { MIEMBROS_EQUIPO, USUARIO_ACTUAL_ID } from '../../constants/tareas'
 import { cargarTablero, guardarTareas } from '../../services/tareasStorage'
 import { moverTarea } from '../../utils/moverTarea'
+import { FILTROS_VACIOS, filtrarTareas, hayFiltrosActivos } from '../../utils/filtrarTareas'
 
 const columns = [
   { id: 'todo', name: 'Por hacer' },
@@ -16,9 +19,10 @@ export default function KanbanPage() {
   const { tareas, error } = tablero
   const [tareaArrastrada, setTareaArrastrada] = useState(null)
   const [columnaDestino, setColumnaDestino] = useState(null)
-  const [busqueda, setBusqueda] = useState('')
+  const [filtros, setFiltros] = useState(FILTROS_VACIOS)
   const [mensaje, setMensaje] = useState('')
-  const consulta = busqueda.trim().toLocaleLowerCase('es')
+  const filtrando = hayFiltrosActivos(filtros)
+  const tareasFiltradas = filtrarTareas(tareas, filtros, USUARIO_ACTUAL_ID)
 
   function setTareas(actualizar) {
     const nuevas = actualizar(tareas)
@@ -35,7 +39,8 @@ export default function KanbanPage() {
       ...actuales,
       { ...datos, id: crypto.randomUUID(), state: 'todo' },
     ])
-    setBusqueda('')
+    // Se limpian los filtros para que la tarea nueva quede visible.
+    setFiltros(FILTROS_VACIOS)
     setMensaje('Tarea creada en Por hacer.')
   }
 
@@ -46,9 +51,9 @@ export default function KanbanPage() {
     setMensaje(`Tarea movida a ${columns.find((column) => column.id === nuevoEstado).name}.`)
   }
 
-  function editarTarea(tareaId, { title, description }) {
+  function editarTarea(tareaId, { title, description, prioridad, responsableId }) {
     setTareas((actuales) => actuales.map((tarea) => (
-      tarea.id === tareaId ? { ...tarea, title, description } : tarea
+      tarea.id === tareaId ? { ...tarea, title, description, prioridad, responsableId } : tarea
     )))
     setMensaje('Cambios guardados en la tarea.')
   }
@@ -102,27 +107,17 @@ export default function KanbanPage() {
           </div>
         )}
         <TareaForm onCrear={crearTarea} />
-        <div className="mb-6">
-          <label htmlFor="buscar-tareas" className="mb-1 block text-sm font-medium text-gray-700">
-            Buscar tareas
-          </label>
-          <input
-            id="buscar-tareas"
-            type="search"
-            value={busqueda}
-            onChange={(event) => setBusqueda(event.target.value)}
-            placeholder="Buscar por título o descripción"
-            className="w-full rounded-lg border border-gray-300 bg-white p-2 focus:outline-blue-700"
-          />
-        </div>
+        <FiltrosTablero filtros={filtros} miembros={MIEMBROS_EQUIPO} onCambiar={setFiltros} />
+        {filtrando && (
+          <p className="mb-4 text-sm text-gray-600">
+            Mostrando {tareasFiltradas.length} de {tareas.length} {tareas.length === 1 ? 'tarea' : 'tareas'}.
+          </p>
+        )}
         <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
           {columns.map((column) => {
             const tareasColumna = tareas.filter((tarea) => tarea.state === column.id)
-            const tareasVisibles = tareasColumna.filter((tarea) => (
-              tarea.title.toLocaleLowerCase('es').includes(consulta) ||
-              tarea.description.toLocaleLowerCase('es').includes(consulta)
-            ))
-            const contador = consulta
+            const tareasVisibles = tareasFiltradas.filter((tarea) => tarea.state === column.id)
+            const contador = filtrando
               ? `${tareasVisibles.length} de ${tareasColumna.length}`
               : tareasColumna.length
             return (
@@ -154,8 +149,8 @@ export default function KanbanPage() {
                 </span>
               </header>
               {tareasVisibles.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">
-                {consulta && tareasColumna.length > 0
-                  ? 'No hay tareas que coincidan con la búsqueda.'
+                {filtrando && tareasColumna.length > 0
+                  ? 'No hay tareas que coincidan con los filtros.'
                   : 'No hay tareas en esta columna.'}
               </p> : (
                 <div className="mt-4 flex flex-col gap-3">
