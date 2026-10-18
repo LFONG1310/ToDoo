@@ -17,6 +17,7 @@ export default function KanbanPage() {
   const [tareaArrastrada, setTareaArrastrada] = useState(null)
   const [columnaDestino, setColumnaDestino] = useState(null)
   const [busqueda, setBusqueda] = useState('')
+  const [mensaje, setMensaje] = useState('')
   const consulta = busqueda.trim().toLocaleLowerCase('es')
 
   function setTareas(actualizar) {
@@ -34,22 +35,27 @@ export default function KanbanPage() {
       ...actuales,
       { ...datos, id: crypto.randomUUID(), state: 'todo' },
     ])
+    setBusqueda('')
+    setMensaje('Tarea creada en Por hacer.')
   }
 
   function cambiarEstado(tareaId, nuevoEstado, antesDeId) {
     if (!columns.some((column) => column.id === nuevoEstado)) return
 
     setTareas((actuales) => moverTarea(actuales, tareaId, nuevoEstado, antesDeId))
+    setMensaje(`Tarea movida a ${columns.find((column) => column.id === nuevoEstado).name}.`)
   }
 
   function editarTarea(tareaId, { title, description }) {
     setTareas((actuales) => actuales.map((tarea) => (
       tarea.id === tareaId ? { ...tarea, title, description } : tarea
     )))
+    setMensaje('Cambios guardados en la tarea.')
   }
 
   function eliminarTarea(tareaId) {
     setTareas((actuales) => actuales.filter((tarea) => tarea.id !== tareaId))
+    setMensaje('Tarea eliminada.')
   }
 
   function finalizarArrastre() {
@@ -68,6 +74,7 @@ export default function KanbanPage() {
       ;[ordenadas[origen], ordenadas[destino]] = [ordenadas[destino], ordenadas[origen]]
       return ordenadas
     })
+    setMensaje('Orden de tareas actualizado.')
   }
 
   function soltarTarea(event, columnId, antesDeId) {
@@ -85,6 +92,7 @@ export default function KanbanPage() {
       <NavBar />
       <main className="mx-auto max-w-7xl p-4 sm:p-6">
         <h1 className="mb-6 text-2xl font-bold text-blue-800">Mi tablero de tareas</h1>
+        <p role="status" className="mb-3 min-h-5 text-sm text-blue-800">{mensaje}</p>
         {error && (
           <div role="alert" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
             <p>{error}</p>
@@ -141,7 +149,7 @@ export default function KanbanPage() {
                 <h2 id={`column-${column.id}`} className="font-semibold text-blue-800">
                   {column.name}
                 </h2>
-                <span aria-label={`${contador} tareas`} className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                <span aria-label={`${contador} ${tareasColumna.length === 1 ? 'tarea' : 'tareas'}`} className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
                   {contador}
                 </span>
               </header>

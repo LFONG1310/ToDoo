@@ -1,15 +1,21 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 export default function TareaForm({ onCrear, tarea, onGuardar, onCancelar }) {
   const formId = useId()
+  const titleRef = useRef(null)
   const [title, setTitle] = useState(tarea?.title ?? '')
   const [description, setDescription] = useState(tarea?.description ?? '')
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (tarea) titleRef.current?.focus()
+  }, [tarea])
 
   function handleSubmit(event) {
     event.preventDefault()
     if (!title.trim()) {
       setError('Escribe un título para la tarea.')
+      titleRef.current?.focus()
       return
     }
 
@@ -22,16 +28,27 @@ export default function TareaForm({ onCrear, tarea, onGuardar, onCancelar }) {
     setTitle('')
     setDescription('')
     setError('')
+    titleRef.current?.focus()
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6 rounded-xl bg-white p-4 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={(event) => {
+        if (tarea && event.key === 'Escape') {
+          event.preventDefault()
+          onCancelar()
+        }
+      }}
+      className="mb-6 rounded-xl bg-white p-4 shadow-sm"
+    >
       <h2 className="mb-3 font-semibold text-blue-800">{tarea ? 'Editar tarea' : 'Nueva tarea'}</h2>
       <label htmlFor={`${formId}-title`} className="block text-sm font-medium text-gray-700">
         Título
       </label>
       <input
         id={`${formId}-title`}
+        ref={titleRef}
         value={title}
         onChange={(event) => { setTitle(event.target.value); setError('') }}
         maxLength={100}
