@@ -19,6 +19,14 @@ export default function KanbanPage() {
     ])
   }
 
+  function cambiarEstado(tareaId, nuevoEstado) {
+    if (!columns.some((column) => column.id === nuevoEstado)) return
+
+    setTareas((actuales) => actuales.map((tarea) => (
+      tarea.id === tareaId ? { ...tarea, state: nuevoEstado } : tarea
+    )))
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <NavBar />
@@ -46,7 +54,14 @@ export default function KanbanPage() {
                 No hay tareas en esta columna.
               </p> : (
                 <div className="mt-4 flex flex-col gap-3">
-                  {tareasColumna.map((tarea) => <TareaCard key={tarea.id} tarea={tarea} />)}
+                  {tareasColumna.map((tarea) => (
+                    <TareaCard
+                      key={tarea.id}
+                      tarea={tarea}
+                      estados={columns}
+                      onCambiarEstado={cambiarEstado}
+                    />
+                  ))}
                 </div>
               )}
             </section>
