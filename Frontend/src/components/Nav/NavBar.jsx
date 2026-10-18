@@ -1,14 +1,22 @@
+import { Link, NavLink } from 'react-router-dom'
+import todooLogo from '../../assets/todoo-logo.png'
+
 export default function NavBar() {
   return (
-    <nav className="w-screen text-black flex h-16 justify-center items-center bg-white shadow-md p-4 overflow-auto">
-      <img src="./src/assets/todoo-logo.png" alt="ToDoo Logo" className="w-25 h-14 mr-2" />
+    <nav aria-label="Navegación principal" className="w-full text-black flex min-h-16 items-center gap-3 bg-white shadow-md p-4 flex-wrap">
+      <Link to="/" aria-label="ToDoo: inicio">
+        <img src={todooLogo} alt="ToDoo" className="w-25 h-14 object-contain" />
+      </Link>
       <div className="flex flex-row justify-between items-center gap-4 w-full">
         <ul className="flex justify-center items-center gap-4">
           <li>
-            <a href="/home">Home</a>
+            <NavLink to="/" end className={({ isActive }) => isActive ? 'font-semibold text-blue-700' : 'hover:text-blue-700'}>Inicio</NavLink>
           </li>
           <li>
-            <a href="/proyectos">Proyectos</a>
+            <NavLink to="/proyectos" className={({ isActive }) => isActive ? 'font-semibold text-blue-700' : 'hover:text-blue-700'}>Proyectos</NavLink>
+          </li>
+          <li>
+            <NavLink to="/kanban" className={({ isActive }) => isActive ? 'font-semibold text-blue-700' : 'hover:text-blue-700'}>Tablero</NavLink>
           </li>
         </ul>
         <button>Cerrar sesión</button>
